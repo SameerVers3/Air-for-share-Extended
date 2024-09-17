@@ -11,7 +11,7 @@ export class RoomManager {
   private async generateRoomId(): Promise<string> {
     let roomId = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const roomIdLength = 8;
+    const roomIdLength = 6;
 
     while (true) {
       roomId = '';
@@ -29,14 +29,24 @@ export class RoomManager {
     return roomId;
   }
 
+  public async roomValid(roomId: string): Promise<boolean> {
+    const roomExists = await this.firebaseService.doesRoomExist(roomId);
+    return roomExists;
+  }
+
   public async createRoom(ip: string): Promise<string> {
     this.roomId = await this.generateRoomId();
     await this.firebaseService.createRoom(this.roomId, ip);
     return this.roomId;
   }
 
-  public async joinRoom(roomId: string, ip: string): Promise<boolean> {
+  public async joinRoom(roomId: string, ip: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
     this.roomId = roomId;
+    console.log("Joining room with ID: ", roomId);
+    console.log("IP: ", ip);
     return await this.firebaseService.joinRoom(roomId, ip);
   }
 

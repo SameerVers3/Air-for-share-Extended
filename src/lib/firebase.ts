@@ -49,28 +49,67 @@ export class FirebaseService {
   }
 
 
-  public async joinRoom(roomId: string, ip: string): Promise<boolean> {
+  public async joinRoom(roomId: string, ip: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
     const roomRef = ref(this.db, 'rooms/' + roomId);
     const roomSnapshot = await get(roomRef);
-
+  
+    console.log("Joining room with ID: ", roomId);
+  
     if (roomSnapshot.exists()) {
       const roomData = roomSnapshot.val();
-
+  
+      console.log("Room data: ", roomData);
+  
       if (roomData.ip !== ip) {
-        return false;
+        console.log("IP does not match");
+        return {
+          success: false,
+          message: "IP does not match",
+        };
       }
-
+  
+      console.log("IP matches");
+  
       const deviceId = await this.getDeviceId();
-
+      console.log("Device ID: ", deviceId);
+  
       const membersRef = ref(this.db, `rooms/${roomId}/members`);
+      const membersSnapshot = await get(membersRef);
+  
+      if (membersSnapshot.exists()) {
+        const membersData = membersSnapshot.val();
+        
+        // Check if the deviceId already exists in the members data
+        if (membersData[deviceId]) {
+          console.log("Member already exists");
+          return {
+            success: true,
+            message: "Member already exists",
+          };
+        }
+      }
+  
+      // Add the member if they don't exist
       await update(membersRef, {
         [deviceId]: { ip },
       });
-
-      return true;
+  
+      console.log("Member added");
+  
+      return {
+        success: true,
+        message: "Member added",
+      };
     }
-
-    return false;
+  
+    console.log("Room does not exist");
+    return {
+      success: false,
+      message: "Room does not exist",
+    };
   }
 
   public async getMemberInfo(roomId: string, deviceId: string): Promise<any> {

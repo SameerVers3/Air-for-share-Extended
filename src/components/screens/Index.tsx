@@ -1,46 +1,66 @@
 import { useEffect, useState } from 'react';
 import { RoomManager } from '../Classes/RoomManager';
-import { set } from 'firebase/database';
 
 function Index() {
   const [activeTab, setActiveTab] = useState('join');
   const [roomId, setRoomId] = useState('');
   const [userName, setUserName] = useState('');
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // Loading state
   const [roomManager, setRoomManager] = useState<RoomManager | null>(null);
   const [ip, setIp] = useState(null);
 
+  // Fetch the user's IP address
   useEffect(() => {
     fetch('https://api.ipify.org?format=json')
       .then((response) => response.json())
       .then((data) => setIp(data.ip));
   }, []);
 
+  // Initialize RoomManager once the IP is available
   useEffect(() => {
     setRoomManager(new RoomManager());
   }, [ip]);
   
-  const handleCreateRoom = () => {
-
+  // Handle room creation
+  const handleCreateRoom = async () => {
     if (!roomManager) {
       return;
     }
 
     if (ip) {
-      roomManager.createRoom(ip);
-      console.log('Room created with ID:', roomManager.roomId);
+      setLoading(true); // Set loading state
+      try {
+        await roomManager.createRoom(ip);
+        console.log('Room created with ID:', roomManager.roomId);
+        setError('');
+      } catch (e) {
+        setError('Failed to create room');
+      } finally {
+        setLoading(false); // Stop loading state
+      }
     } else {
       setError('IP address not available');
     }
   };
 
-  const handleJoinRoom = () => {
+  // Handle joining a room
+  const handleJoinRoom = async () => {
     if (!roomId) {
       setError('Please enter room ID');
       return;
     }
-    // Logic to join a room
-    console.log('Joining room with ID:', roomId);
+
+    setLoading(true); // Set loading state
+    try {
+      // Logic to join a room (placeholder for actual functionality)
+      console.log('Joining room with ID:', roomId);
+      setError('');
+    } catch (e) {
+      setError('Failed to join room');
+    } finally {
+      setLoading(false); // Stop loading state
+    }
   };
 
   return (
@@ -75,8 +95,8 @@ function Index() {
               value={roomId}
               onChange={(e) => setRoomId(e.target.value)}
             />
-            <button className="btn btn-primary mt-4" onClick={handleJoinRoom}>
-              Join Room
+            <button className="btn btn-primary mt-4" onClick={handleJoinRoom} disabled={loading}>
+              {loading ? 'Joining...' : 'Join Room'}
             </button>
             {error && <p className="text-red-500 mt-2">{error}</p>}
           </div>
@@ -91,8 +111,8 @@ function Index() {
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
             />
-            <button className="btn btn-secondary mt-4" onClick={handleCreateRoom}>
-              Create Room
+            <button className="btn btn-secondary mt-4" onClick={handleCreateRoom} disabled={loading}>
+              {loading ? 'Creating...' : 'Create Room'}
             </button>
             {error && <p className="text-red-500 mt-2">{error}</p>}
           </div>
