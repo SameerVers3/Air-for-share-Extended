@@ -11,7 +11,7 @@ export class RoomManager {
   private async generateRoomId(): Promise<string> {
     let roomId = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const roomIdLength = 6;
+    const roomIdLength = 5;
 
     while (true) {
       roomId = '';

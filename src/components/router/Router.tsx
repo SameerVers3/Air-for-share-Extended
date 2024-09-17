@@ -1,6 +1,9 @@
 import { Dialog } from '@headlessui/react';
 import { lazy, Suspense, useState } from 'react';
 import { Outlet, RouteObject, useRoutes, BrowserRouter } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { HiMenu, HiX } from 'react-icons/hi';
+import Navbar from "./Navbar"
 
 const Loading = () => <p className="p-4 w-full h-full text-center">Loading...</p>;
 
@@ -11,9 +14,7 @@ const Room = lazy(() => import('~/components/screens/Room'));
 function Layout() {
   return (
     <div>
-      <nav className="p-4 flex items-center justify-between">
-        <span>Header</span>
-      </nav>
+      <Navbar/>
       <Outlet />
     </div>
   );
