@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { RoomManager } from '../Classes/RoomManager';
+import useDebounce from '../hooks/useDebounce'; // Adjust the import path as necessary
 
 const Room = () => {
   const { id } = useParams<{ id: string }>();
@@ -11,6 +12,7 @@ const Room = () => {
   const [roomManager, setRoomManager] = useState<RoomManager | null>(null);
   const [joined, setJoined] = useState<boolean>(false); // Track join status
   const [message, setMessage] = useState<string>(""); // For textarea input
+  const debouncedMessage = useDebounce(message, 500); // Adjust the debounce delay as necessary
 
   useEffect(() => {
     fetch('https://api.ipify.org?format=json')
@@ -36,7 +38,7 @@ const Room = () => {
         setRoomManager(new RoomManager());
       }
 
-      setLoading(true); // Start loading
+      setLoading(true);
 
       try {
         const joinRes = await roomManager?.joinRoom(roomId, ip);
@@ -45,9 +47,8 @@ const Room = () => {
           console.log("Joined room with ID: ", roomId);
           setJoined(true);
           setError("");
-          // Start listening for messages after successfully joining
           roomManager?.listenForMessages((message) => {
-            setMessage(message); // Update the displayed message
+            setMessage(message);
           });
         } else {
           console.log("Failed to join room");
@@ -59,12 +60,27 @@ const Room = () => {
         setJoined(false);
         setError("An error occurred while joining the room");
       } finally {
-        setLoading(false); // End loading
+        setLoading(false);
       }
     };
 
     joinRoom();
   }, [ip, roomId, roomManager]);
+
+  useEffect(() => {
+    if (roomManager && debouncedMessage.trim()) {
+      const sendDebouncedMessage = async () => {
+        try {
+          console.log("Sending message: ", debouncedMessage);
+          await roomManager.sendMessage(debouncedMessage);
+        } catch (error) {
+          console.error("Error sending message: ", error);
+        }
+      };
+
+      sendDebouncedMessage();
+    }
+  }, [debouncedMessage, roomManager]);
 
   const handleCopyMessage = () => {
     navigator.clipboard.writeText(message)
@@ -73,19 +89,7 @@ const Room = () => {
   };
 
   const handleChange = (value: string) => {
-    // add that effect where the message is updated in real-time
-    handleupdateMessage(value);
-  }
-
-  const handleupdateMessage = async (value: string) => {
-    if (roomManager && message.trim()) {
-      try {
-        await roomManager.sendMessage(value);
-        setMessage(value);
-      } catch (error) {
-        console.error("Error sending message: ", error);
-      }
-    }
+    setMessage(value);
   };
 
   return (
@@ -102,12 +106,12 @@ const Room = () => {
             value={message}
             onChange={(e) => handleChange(e.target.value)}
           />
-            <button
-              className="absolute top-0 right-0 mt-2 mr-2 bg-blue-500 text-white p-1 rounded"
-              onClick={handleCopyMessage}
-            >
-              Copy
-            </button>
+          <button
+            className="absolute top-0 right-0 mt-2 mr-2 bg-blue-500 text-white p-1 rounded"
+            onClick={handleCopyMessage}
+          >
+            Copy
+          </button>
         </div>
       ) : (
         error && <p className="text-red-500 mt-4">{error}</p>
