@@ -1,21 +1,29 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaCode } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
+import logo from '../../images/logo.png'; // Update with your correct image path
 
 const Navbar = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const navigate = useNavigate();
 
   const handleToggle = () => {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle('dark', !isDarkMode);
   };
 
+  const BackFunc = () => {
+    navigate("/");
+  }
+
   return (
     <nav className={`relative flex items-center justify-between p-4 shadow-md ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
       {/* Logo */}
-      <div className="text-xl font-extrabold text-gray-900">
-            AirForShare Extended
-
+      <div className="flex items-center">
+        <a onClick={BackFunc} className='cursor-pointer'>
+            <img src={logo} alt="Logo" className="w-28 h-16 object-cover mr-3"/>
+        </a>
       </div>
 
       {/* About the Dev Button */}

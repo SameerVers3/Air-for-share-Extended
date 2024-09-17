@@ -1,20 +1,18 @@
-import { Dialog } from '@headlessui/react';
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense } from 'react';
 import { Outlet, RouteObject, useRoutes, BrowserRouter } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { HiMenu, HiX } from 'react-icons/hi';
-import Navbar from "./Navbar"
+import Navbar from "./Navbar";
 
 const Loading = () => <p className="p-4 w-full h-full text-center">Loading...</p>;
 
 const IndexScreen = lazy(() => import('~/components/screens/Index'));
 const Page404Screen = lazy(() => import('~/components/screens/404'));
 const Room = lazy(() => import('~/components/screens/Room'));
+const DeveloperPage = lazy(() => import('~/components/screens/developer')); // Import DeveloperPage
 
 function Layout() {
   return (
     <div>
-      <Navbar/>
+      <Navbar />
       <Outlet />
     </div>
   );
@@ -41,6 +39,10 @@ const InnerRouter = () => {
         {
           path: 'r/:id',
           element: <Room />,
+        },
+        {
+          path: 'developer', // Add the developer route
+          element: <DeveloperPage />,
         },
         {
           path: '*',
