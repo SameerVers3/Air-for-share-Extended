@@ -50,6 +50,21 @@ export class RoomManager {
     return await this.firebaseService.joinRoom(roomId, ip);
   }
 
+  public async joinPublicRoom(ip: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    console.log("Joining public room with IP: ", ip);
+    this.roomId = ip;
+    
+    const res = await this.firebaseService.joinPublicRoom(ip);
+    console.log(res);
+    return res;
+  }
+
+  
+  // Removed duplicate listenForPublicMessages method
+
   public async sendMessage(messageContent: string): Promise<void> {
     if (!this.roomId) {
       throw new Error('No room joined or created.');
@@ -62,5 +77,19 @@ export class RoomManager {
       throw new Error('No room joined or created.');
     }
     this.firebaseService.listenForMessages(this.roomId, callback);
+  }
+
+  public async sendPublicMessage(messageContent: string): Promise<void> {
+    if (!this.roomId) {
+      throw new Error('No room joined or created.');
+    }
+    await this.firebaseService.sendPublicMessage(this.roomId, messageContent);
+  }
+
+  public listenForPublicMessages(callback: (messages: any) => void): void {
+    if (!this.roomId) {
+      throw new Error('No room joined or created.');
+    }
+    this.firebaseService.listenForPublicMessages(this.roomId, callback);
   }
 }

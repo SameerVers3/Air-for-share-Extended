@@ -158,7 +158,7 @@ const Room = () => {
             <div className="relative bg-white p-6 rounded-lg shadow-md">
               <textarea
                 ref={textareaRef}
-                className="w-full p-3 text-lg font-md border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-colors duration-150 resize-none overflow-hidden"
+                className="w-full p-3 h-[60vh] text-lg font-md border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-colors duration-150 resize-none overflow-hidden"
                 placeholder="Enter your message here..."
                 value={message}
                 onChange={(e) => handleChange(e.target.value)}

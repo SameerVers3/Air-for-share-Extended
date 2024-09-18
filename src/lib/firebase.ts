@@ -48,6 +48,67 @@ export class FirebaseService {
     });
   }
 
+  public async joinPublicRoom(ip: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    try {
+      console.log("2. Joining public room with IP: ", ip);
+      
+      // Replace dots with underscores to create a valid path
+      const sanitizedIp = ip.replace(/\./g, '_');
+      console.log("2. Sanitized Room ID: ", sanitizedIp);
+      
+      const roomRef = ref(this.db, 'rooms/' + sanitizedIp);
+      const roomSnapshot = await get(roomRef);
+      console.log("2. Room snapshot: ", roomSnapshot);
+      
+      if (!roomSnapshot.exists()) {
+        console.log("Room does not exist");
+        await set(roomRef, {
+          ip,  // Store the original IP
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          content: ""
+        });
+        return {
+          success: true,
+          message: "Room created"
+        };
+      } else {
+        console.log("Room already exists");
+        return {
+          success: true,
+          message: "Room already exists"
+        };
+      }
+    } catch (error) {
+      console.error("Error joining public room:", error);
+      return {
+        success: false,
+        message: `Error joining room: ${error.message}`
+      };
+    }
+  }
+
+  public async listenForPublicMessages(roomId: string, callback: (messages: any) => void): Promise<void> {
+    const sanitizedRoomId = roomId.replace(/\./g, '_');
+    const messageRef = ref(this.db, `rooms/${sanitizedRoomId}/content`);
+    onValue(messageRef, (snapshot: { val: () => any; }) => {
+      const messages = snapshot.val();
+      callback(messages);
+    });
+  }
+
+  public async sendPublicMessage(roomId: string, messageContent: string): Promise<void> {
+    const sanitizedRoomId = roomId.replace(/\./g, '_');
+    const messageRef = ref(this.db, `rooms/${sanitizedRoomId}`);
+    await update(messageRef, {
+      content: messageContent,
+      updatedAt: Date.now(),
+    });
+  }
+
 
   public async joinRoom(roomId: string, ip: string): Promise<{
     success: boolean;
